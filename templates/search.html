@@ -1,0 +1,17 @@
+{% extends "base.html" %}
+{% block title%} Search - YouFile {% endblock %}
+{% block content %}
+
+<div> 
+    {% for file in files_search %}
+        <div class="fileshare-box-link">
+            <a href="fs?f={{ file['id'] }}">
+                <img class="home-img" src="static/Imgs/{{file['imagep']}}" alt="Publié le {{file['datepubli']}} par {{file['iduser']}}" />
+                <p>{{file['Description']}}</p>
+                <p>Publié le {{file['datepubli']}} par {{file['iduser']}}</p>
+            </a>
+        </div>
+    {% endfor %}
+</div>
+
+{% endblock %} 

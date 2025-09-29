@@ -1,0 +1,33 @@
+{% extends "base.html" %}
+{% block title%} Edit profile - YouFile {% endblock %}
+{% block content %}
+<h1>Edit your profile</h1>
+<form action="/editfileshare" method="POST" enctype=multipart/form-data>
+    <p>
+        <label for="username">Username: </label>
+        <input type="text" name="username" id="username" value="{{ fileInfo['name'] }}">
+    </p>
+    <p>
+        <label for="image"> Image : </label>
+        <input type="file" name="image" id="image", accept=".webp, .jpeg, .heif, .jpg, .tiff, .psd, .gif, .raw, .bmp, .indd, .png">
+    </p>
+    <p>
+        <textarea placeholder="User description" name="Description" id="Description">{{ fileInfo['description'] }}</textarea>
+    </p>
+    <p>
+        <label for="fileType">File Type:</label>
+        <select name="fileType" id="fileType" value="{{ fileInfo['filetype'] }}">
+            <option value="Archive/Compressed">Archive/Compressed</option>
+            <option value="Video">Video</option>
+            <option value="Executable">Executable</option>
+            <option value="Audio">Audio</option>
+            <option value="Datas">Datas</option>
+            <option value="Other">Other</option>
+    </p>
+    <p>
+        <div class="submit">
+            <input type="submit" value="Edit fileshare">
+        </div>
+    </p>
+</div>
+{% endblock %} 

@@ -1,0 +1,90 @@
+{% extends "base.html" %}
+{% block title%} {{userInfo["username"]}} - YouFile {% endblock %}
+{% block content %}
+
+    <div class="mainInformation">
+        <div class="Title">
+            <h1>{{ userInfo["username"] }}</h1>
+        </div>
+        <div class="image-info-dl-description">
+            <div class="image">           
+                    <img src="static/Imgs/{{userInfo['profileImage']}}" width=300px height=300px>
+                </div>
+            <div class="info-dl-description">
+                <div class="info-dl">
+                    <div class="info">
+                        <ul>
+                            <li> </li>
+                            <li> Joined {{userInfo['creationdate']}} </li>
+                            <li> Type: FileFile </li>
+                        </ul>
+                        <ul>
+                            <li> File Name: FileFile.File </li>
+                            <li> SIze : 1.23 MB </li>
+                            <li> Type: FileFile </li>
+                        </ul>
+                    </div>
+                    <div class="download">
+                        <a href="/" download="nope" id="Subscribe">
+                            <p>
+                                Subscribe
+                            </p>
+                        </a>
+                    </div>
+                </div>
+                <div class="description">
+                    {{ userInfo['description'] }}
+                </div>
+            </div>
+        </div>
+        <div class="comments">
+            {% if userFiles %}
+                <h2> Files ( {{userFiles|length }} )</h2>
+                {% for file in userFiles %}
+                    <p> <a href="/fs?f={{ file['id']}}">{{file["name"]}}</a> </p>
+                {% endfor %}
+            {% else %}
+                <h2> Files (0) </h2>
+                <p> No files </p>
+            {% endif %}
+
+        <h2> Comments {% if comments %} ({{comments|length}}) {% else %} (0) {% endif %}</h2>
+            {% if comments %}
+            {% for comment in comments %}
+                <div class="comment">
+                    <div class="user-comment-info">
+                        <div class="comment-info">
+                            <a href="/user?u={{comment['iduser']}}"> <img src="static/Imgs/{{ comment['userimagep'] }}" width=40 height=40></a>
+                            <div class="comment-msc-info">
+                                <a href="/user?u={{comment['iduser']}}"> {{comment["username"]}} </a>
+                                <p>{{comment["datepubl"]}}</p>
+                            </div>
+                        </div>
+                        <div class="fileShare-link">
+                            <p class="fileShare-link"> ON <a href="/fs?f={{comment['idfileshare']}}"> {{comment['filename']}} </a></p>
+                        </div>
+                    </div>
+                    <div class="comment-content"> 
+                        <p>
+                            {{ comment["content"] }}
+                        </p>
+                    </div>
+                    <div class="comment-options">
+                        <img src="/static/Imgs/Static/Repondre.png" title = "Reply" width="20px" height="20px">
+                        {% if comment['iduser'] == session['iduser'] %}
+                        <form action="/fs" method="POST">
+                            <input type="hidden" name="postType", value="delcomment"/>
+                            <input type="hidden" name="userInfo", value="{{session['iduser']}}"/>
+                            <input type="hidden" name="commentID", value="{{comment['idcomment']}}">
+                            <input type="image" src="/static/Imgs/Static/Delete.png" title = "Delete" alt="submit" width="20px" height="20px">
+                        </form>
+                    {% endif %}
+                    </div>
+                </div>
+            {% endfor %}
+        {% else %}
+            <p> No Comments</p>
+        {% endif %}
+        </div>        
+    </div>
+{% endblock %}

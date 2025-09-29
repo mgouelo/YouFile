@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
+        <link rel="stylesheet" href="{{ url_for('static', filename='css/interactives.css')}}">
+        <link rel="stylesheet" href="{{ url_for('static', filename='css/forms.css')}}">
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.css">
+        <link rel="icon" href="/static/Imgs/TestImgs.png">
+        <script src="{{ url_for('static', filename='js/script.js')}}" defer></script>
+        <title>{% block title %}{% endblock %}</title>
+    </head>
+    <body>
+        <div class="navbar">
+            <a href="/">YouFile</a>
+            <a href="/subscribtions">Subscribtions</a>
+            
+            <div class="searchbar">
+                <form action="{{ url_for('search') }}" method="POST">
+                    <label for="nom">Search : </label>
+                    <input type="text" name="search" id="search" placeholder="Search..." required>
+                    <input type="submit" value="🔍">
+                </form>
+            </div>
+
+
+                {% if session['username'] %}
+                    <a href="/upload" class="right">Upload</a>
+                    <a href="/logout" class="right">logout</a>
+                    <a href="/user?u={{session['iduser']}}" class="right"> {{session['username']}}</a>
+                {% else %}
+                    <a href="{{ url_for('login') }}" class="right">login</a>
+                {% endif %}
+
+
+        </div>
+        <div class="main">
+            {% block content %}
+            {% endblock %}       
+        </div>
+        <footer>
+            <div class="footer">
+                © 2024 | YouFile
+
+            </div>
+        </footer>
+    </body>
+
+</html>

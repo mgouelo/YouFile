@@ -1,0 +1,36 @@
+{% extends "base.html" %}
+{% block title%} Login - YouFile {% endblock %}
+{% block content %}
+
+<h1>Login</h1>
+
+<center>
+    {% with messages = get_flashed_messages() %}
+        {% if messages %}
+            {% for message in messages %}
+                {{ message }}
+            {% endfor %}
+        {% endif %}
+    {% endwith %}
+    <form action="{{ url_for('login') }}" method="POST">
+            <p>
+                <label for="email">Mail : </label>
+                <input type="email" name="email" id="nom" required>
+            </p>
+            <p>
+                <!-- Champ de type "password" -->
+                <label for="mdp">Password </label>
+                <input type="password" name="passwd" id="mdp" required>
+                <i class="fa-solid fa-eye-slash" onclick="passwdVisibility(this);"></i>
+            </p>
+        <p>
+            <p> Don't have an acount ? <a href="/signup">Sign up</a>.</p>
+            <p> Forgot your password ? <a href="/forgotpassword">reset password</a></p>
+            <div class="submit">
+                <input type="submit" value="Login">
+            </div>
+        </p>
+    </form>
+</center>
+
+{% endblock %}

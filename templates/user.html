@@ -1,0 +1,132 @@
+{% extends "base.html" %}
+{% block title%} {{userInfo["username"]}} - YouFile {% endblock %}
+{% block content %}
+
+    <div class="mainInformation">
+        <div class="Title">
+            <h1>
+                <p>
+                    {{ userInfo["username"] }}
+                </p>
+                 {% if session["iduser"] == userInfo["id"] %}
+                    <div class="star-rating">
+                        <a href="/user/editprofile">
+                            <img src="/static/Imgs/Static/pencil.png" title = "edit profile" width="20px" height="20px">
+                        </a>
+                    </div>
+                {% endif %}
+            </h1>
+        </div>
+        <div class="image-info-dl-description">
+            <div class="image">           
+                    <img src="static/Imgs/{{userInfo['profileImage']}}" width=300px height=300px>
+                </div>
+            <div class="info-dl-description">
+                <div class="info-dl">
+                    <div class="info">
+                        <ul>
+                            <li> {{ subscribers|length }} subscribers </li>
+                            <li> Joined {{userInfo['creationdate']}} </li>
+                            <li> <a href="#fileShares"> {% if userFiles %} {{ userFiles|length }} {% else %} No {% endif %} file(s) uploaded </a></li>
+                        </ul>
+                        <ul>
+                            <li> File Name: FileFile.File </li>
+                            <li> SIze : 1.23 MB </li>
+                            <li> Type: FileFile </li>
+                        </ul>
+                    </div>
+                    <div class="download">
+                        {% if subscribed %}
+                            <a href="/subscribe?u={{userInfo['id']}}" id="Subscribed">
+                                <p> 
+                                    Subscribed
+                                </p>
+                            </a>
+                        {% else %}
+                            <a href="/subscribe?u={{userInfo['id']}}" id="Subscribe">
+                                <p> 
+                                    Subscribe
+                                </p>
+                            </a>                        
+                        {% endif %}
+                    </div>
+                </div>
+                <div class="description">
+                    {{ userInfo['description'] }}
+                </div>
+            </div>
+        </div>  
+        <div class="comments" id="fileShares">
+            {% if userFiles %}
+                <h2> Files ( {{ userFiles|length }} )</h2>
+                {% for file in userFiles %}
+                    <p> 
+                        <div class="fileshare-box-link"> 
+                            <a href="/fs?f={{ file['id']}}">
+                                <img src="static/Imgs/{{ file['imagep'] }}" width="100px" height="100px">
+                                <p>
+                                    {{file["name"]}}
+                                </p> 
+                                <p>
+                                    Published: {{ file['datepubli'] }}
+                                </p>
+                            </a>
+                            
+                            {% if session['iduser'] == userInfo['id'] or userInfo['role'] == 7%}
+                                <div class="download">
+                                    <a href="">
+                                        <p> 
+                                            Delete
+                                        </p>
+                                    </a>
+                                </div>
+                            {% endif %}
+                            
+                        </div>
+                    </p>
+                {% endfor %}
+            {% else %}
+                <h2> Files (0) </h2>
+                <p> No files </p>
+            {% endif %}
+
+        <h2> Comments {% if comments %} ({{comments|length}}) {% else %} (0) {% endif %}</h2>
+            {% if comments %}
+            {% for comment in comments %}
+                <div class="comment">
+                    <div class="user-comment-info">
+                        <div class="comment-info">
+                            <a href="/user?u={{comment['iduser']}}"> <img src="static/Imgs/{{ comment['userimagep'] }}" width=40 height=40></a>
+                            <div class="comment-msc-info">
+                                <a href="/user?u={{comment['iduser']}}"> {{comment["username"]}} </a>
+                                <p>{{comment["datepubl"]}}</p>
+                            </div>
+                        </div>
+                        <div class="fileShare-link">
+                            <p class="fileShare-link"> ON <a href="/fs?f={{comment['idfileshare']}}"> {{comment['filename']}} </a></p>
+                        </div>
+                    </div>
+                    <div class="comment-content"> 
+                        <p>
+                            {{ comment["content"] }}
+                        </p>
+                    </div>
+                    <div class="comment-options">
+                        <img src="/static/Imgs/Static/Repondre.png" title = "Reply" width="20px" height="20px">
+                        {% if comment['iduser'] == session['iduser'] %}
+                        <form action="/fs" method="POST">
+                            <input type="hidden" name="postType", value="delcomment"/>
+                            <input type="hidden" name="userInfo", value="{{session['iduser']}}"/>
+                            <input type="hidden" name="commentID", value="{{comment['idcomment']}}">
+                            <input type="image" src="/static/Imgs/Static/Delete.png" title = "Delete" alt="submit" width="20px" height="20px">
+                        </form>
+                    {% endif %}
+                    </div>
+                </div>
+            {% endfor %}
+        {% else %}
+            <p> No Comments</p>
+        {% endif %}
+        </div>        
+    </div>
+{% endblock %}

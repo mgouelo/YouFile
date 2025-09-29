@@ -1,0 +1,120 @@
+{% extends "base.html" %}
+{% block title%} {{fileInfo["name"]}} file - YouFile {% endblock %}
+{% block content %}
+
+    <div class="mainInformation">
+        <div class="Title">
+            <h1>
+                <p>
+                    {{ fileInfo["name"] }}
+                </p>
+
+                <div class="star-rating">
+                    {% if session["iduser"] == fileInfo["iduser"] %}
+                        <div class="star-rating">
+                            <a href="/editfileshare">
+                                <img src="/static/Imgs/Static/pencil.png" title = "edit file" width="20px" height="20px">
+                            </a>
+                        </div>
+                    {% endif %}
+                    <div class="star">
+                        <a href="/rate?r=1" {% if userRating >= 1 %} class="light-yellow" {% endif %}></a>
+                        <div class="star">
+                            <a href="/rate?r=2" {% if userRating >= 2 %} class="light-yellow" {% endif %}></a>
+                            <div class="star">
+                                <a href="/rate?r=3"{% if userRating >= 3 %} class="light-yellow" {% endif %}></a>
+                                <div class="star">
+                                    <a href="/rate?r=4" {% if userRating >= 4 %} class="light-yellow" {% endif %}></a>
+                                    <div class="star">
+                                        <a href="/rate?r=5" {% if userRating >= 5 %} class="light-yellow" {% endif %}></a>
+                                    </div>  
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="average-rating">({{fileRating}}) {% if userRating != 0 %} <a title = "Remove rating" href="/removeRating">✕</a>{% endif %}</div>
+                </div>
+            </h1>
+        </div>
+        <div class="image-info-dl-description">
+            <div class="image">           
+                    <img src="static/Imgs/{{ fileInfo['imagep'] }}" width=300px height=300px>
+                </div>
+            <div class="info-dl-description">
+                <div class="info-dl">
+                    <div class="info">
+                        <ul>
+                            <li> <a href="/user?u={{ fileInfo['iduser'] }}">User: {{ userInfo["username"] }}</a></li>
+                            <li> Published {{fileInfo['datepubli']}} </li>
+                        </ul>
+                        <ul>
+                            <li> Type : {{fileInfo['filetype']}} ({{fileInfo['fileextension']}})</li>
+                            <li> Size : {{fileInfo['size']}} </li>
+                        </ul>
+                    </div>
+                    <div class="download">
+                        <a href="static/fileshares/{{fileInfo['filep']}}" download="">
+                            <p>
+                                Download
+                            </p>
+                        </a>
+                    </div>
+                </div>
+                <div class="description">
+                    <p>
+                        {% for descriptionp in fileInfo["description"].split("\n") %}
+                            <p class="descriptionp"> {{ descriptionp }} </p>
+                        {% endfor %}
+                    </p>
+                </div>
+            </div>
+        </div>
+        <div class="comments">
+            <h2> Comments {% if comments %} ({{comments|length}}) {% else %} (0) {% endif %}</h2>
+            
+            {% if session['username'] %}
+            <div class="post-comment">
+                <form action="/postcomment" method="POST">
+                    <label for="comment">Comment : </label>
+                    <textarea placeholder="Type your comment here..." id="text" name="comment" id="comment-content" required></textarea>
+                    <input type="submit" value="Send Comment">
+                </form>            
+            </div>
+            {% endif %}
+
+            {% if comments %}
+                {% for comment in comments %}
+                    <div class="comment">
+                        <div class="comment-info">
+                            <a href="/user?u={{comment['iduser']}}"> <img src="static/Imgs/{{ comment['userimagep'] }}" width=40 height=40></a>
+                            <div class="comment-msc-info">
+                                <a href="/user?u={{comment['iduser']}}"> {{comment["username"]}} </a>
+                                <p>{{comment["datepubl"]}}</p>
+                            </div>
+                        </div>
+                        <div class="comment-content"> 
+                            <p>
+                                {% for commentp in comment["content"].split("\n") %}
+                                    <p> {{ commentp }} </p>
+                                {% endfor %}
+                            </p>
+                        </div>
+                        <div class="comment-options">
+                            <img src="/static/Imgs/Static/Repondre.png" title = "Reply" width="20px" height="20px">
+                            {% if comment['iduser'] == session['iduser'] %}
+                            <form action="/fs" method="POST">
+                                <input type="hidden" name="postType", value="delcomment"/>
+                                <input type="hidden" name="userInfo", value="{{session['iduser']}}"/>
+                                <input type="hidden" name="commentID", value="{{comment['idcomment']}}">
+                                <input type="image" src="/static/Imgs/Static/Delete.png" title = "Delete" alt="submit" width="20px" height="20px">
+                            </form>
+                        {% endif %}
+                        </div>
+                    </div>
+                {% endfor %}
+            {% else %}
+                <p> No Comments</p>
+            {% endif %}
+        </div>        
+    </div>
+{% endblock %}

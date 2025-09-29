@@ -1,0 +1,22 @@
+{% extends "base.html" %}
+
+{% block content %}
+<h1>Page de connexion</h1>
+<form action="{{ url_for('traitement') }}" method="POST">
+    <p>
+        <!-- Champ de type "text"   name pour le formulaire et id pour js et css -->
+        <label for="labelnom">Nom : </label>
+        <input type="text" name="namenom" id="idnom" required>
+    </p>
+    <p>
+        <!-- Champ de type "password" -->
+        <label for="mdp">Mot de passe : </label>
+        <input type="password" name="mdp" id="mdp" required>
+    </p>
+    <p>
+        <!-- Bouton d'envoi du formulaire -->
+        <input type="submit" value="Envoyer le formulaire">
+        <!-- <button type="submit">Envoyer le formulaire</button> -->
+    </p>
+</form>
+{% endblock %}

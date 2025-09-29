@@ -1,0 +1,25 @@
+{% extends "base.html" %}
+{% block title%} Subscribtion - YouFile {% endblock %}
+{% block content %}
+
+<div class="home-content">
+    <img src="/static/Imgs/{{user_dict['imagep']}}" width="150px" height="150px">
+    <h1 style="font-size: 50px;">{{user_dict['username']}}'s subscribtions :</h1>
+</div>
+
+{% for dict in list_Subscribtion: %}
+    <div class="comments" id="fileShares">
+        <div class="fileshare-box-link"> 
+            <a href="/user?u={{ dict['id'] }}">
+                <img src="/static/Imgs/{{dict['imagep']}}" width="100px" height="100px">
+                <p style="font-size: 20px;">
+                    {{dict['username']}} | 
+                </p>
+                <p style="font-size: 20px;">
+                    {{dict['description']}}
+                </p>
+            </a>
+        </div>
+    </div>
+{% endfor %}
+{% endblock %}

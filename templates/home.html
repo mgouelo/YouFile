@@ -1,0 +1,39 @@
+{% extends "base.html" %}
+{% block title  %} {{name}} Home - YouFile {% endblock %}
+{% block content %}  
+<center>
+    <div>
+        <h1 style="font-size: 50px;">YouFile</h1>
+    </div>
+    <div class="home-content" style="font: size 25px;">
+        YouFile est une plateforme de partage de fichier.
+    </div>
+</center>
+<div class="recentFiles">
+    <h2 style="font-size: 25px;">
+        Fichiers récents
+    </h2>
+    {% for file in recentfilesdict %}
+        <div class="home-content" id="fileShares">
+            <div class="fileshare-box-link">
+                <a href="/fs?f={{ file['id'] }}">
+                    <div class="home_recentfileimage">
+                        <img class="home-img" src="static/Imgs/{{file['imagep']}}" alt="Publié le {{file['datepubli']}}" />
+                    </div>
+                    <p>
+                        <h3>
+                            {{file["name"]}}
+                        </h3>
+                    </p>
+                    <p>
+                        <a href="/user?u={{file['iduser'] }}">
+                            From {{file['iduser']}}
+                        </a>
+                        | Description : {{file['description']}}
+                    </p>
+                </a>
+            </div>
+        </div>
+    {% endfor %}
+</div>
+{% endblock %}
