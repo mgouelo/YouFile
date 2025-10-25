@@ -9,6 +9,9 @@ def loginUser(email, password):
     userInfo = shearchUserInformationEmailDict(email)
     #penser à la possibilité que l'email ne soit pas dans la db
     return hashlib.md5(password.encode()).hexdigest() == userInfo['password'] , userInfo
+
+
+    
 def signUpUser(email, password, username):
     '''
     Fonction d'inscription de l'utilisateur
@@ -139,14 +142,14 @@ def removeRating(iduser, idfileshare):
 def uploadFile(iduser, title, filename, imagename, description, filetype, file_extension, FILE, IMAGE):
     id = randomID(11)
     if getFileShareInformation(id) is not None:
-        return uploadFile(iduser, title, filename, imagename, description, filetype, file_extension, FILE, IMAGE)
+        return uploadFile(iduser, title, filename, imagename, description, filetype, file_extension, FILE, IMAGE) # récursivité pour s'assurer que l'id généré est unique
     else:
         os.makedirs(f"static/Imgs/{id}")
 
         if imagename is None:
             imagep = "TestImgs.png"
         else:
-            imagep = "image" + "." + imagename.split(".")[-1]
+            imagep = "image" + "." + imagename.split(".")[-1] # nom + '.' + extension
             IMAGE.save(os.path.join(f"static/Imgs/{id}", imagep))
         cmd = """INSERT
                     INTO

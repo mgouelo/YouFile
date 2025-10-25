@@ -18,6 +18,8 @@ Il est crucial de définir une secret_key sécurisée et complexe pour empêcher
 
 app.config['SECRET_KEY']  = secrets.token_hex(24)
 
+
+
 @app.before_request
 def before_request(): #redirige d'une adresse http à https
     if "prev_url" not in session:
@@ -31,6 +33,9 @@ def before_request(): #redirige d'une adresse http à https
         code = 301 #le code 301 permet au navigateur de rediriger automatiquement les requêtes http vers https par la suite
         return redirect(url, code=code) 
 
+
+
+
 @app.errorhandler(Exception)
 def handle_error(e):
     code = 500
@@ -38,6 +43,7 @@ def handle_error(e):
         code = e.code 
     print(e)
     return render_template("error.html", errorcode = code), code
+
 
 
 @app.route('/index')
@@ -48,8 +54,10 @@ def index():
     Postcondition : retourne home.html et des variables python pour la page d'acceuil du site web
     '''
     session["prev_url"].append(("home",))
-    recentfilesdict = getRecentfilesDict() #la fonction récupère le dictionnaire des 4 derniers fichiers posté sur le site.
+    recentfilesdict = getRecentfilesDict() #la fonction récupère le dictionnaire des 4 derniers fichiers postés sur le site.
     return render_template("home.html", recentfilesdict=recentfilesdict)
+
+
 
 @app.route('/search', methods=["POST", "GET"])
 def search():
@@ -68,6 +76,7 @@ def search():
         return render_template("search.html", files_search=files_search)
 
 
+
 @app.route('/postcomment', methods=["POST"])
 def post_comment():
     datas = request.form
@@ -80,6 +89,8 @@ def post_comment():
     comment_content = datas.get('comment')
     addComment(session['iduser'], fileShare, comment_content)
     return redirect(request.referrer)
+
+
 
 @app.route('/file', methods=["POST", "GET"])
 @app.route('/fileshare', methods=["POST", "GET"])
@@ -112,6 +123,9 @@ def fs():
             userRating = 0
         session["prev_url"].append(("fs", file_id))
         return render_template("fs.html", fileInfo = fileInfo, userInfo = userInfo, comments=comments, fileRating=fileRating, userRating=userRating)
+
+
+
 @app.route('/rate')
 def rate():
     note = int(request.args.get('r'))
@@ -125,7 +139,9 @@ def rate():
         return redirect(url_for('login'))
     if not hasUserRatedFileshare(session['iduser'], fileShareId):
         rateFileShare(session['iduser'], fileShareId, note)
-    return redirect(request.referrer)    
+    return redirect(request.referrer)
+
+
 @app.route('/removeRating')
 def removeRate():
     prev_url = session["prev_url"][-1]    
@@ -137,6 +153,8 @@ def removeRate():
     if  hasUserRatedFileshare(session['iduser'], fileShareId):
         removeRating(session['iduser'], fileShareId)
     return redirect(request.referrer)
+
+
 
 @app.route('/upload', methods=["POST", "GET"])
 def upload():
@@ -173,6 +191,8 @@ def upload():
         session["prev_url"].append(("upload", ))
         return render_template("upload.html")
 
+
+
 @app.route('/edit/fileshare', methods=["POST", "GET"])
 @app.route('/editfileshare', methods=["POST", "GET"])
 def editfile():
@@ -208,6 +228,8 @@ def editfile():
     else:
         return redirect("/")
 
+
+
 @app.route('/user')
 def user():
     '''
@@ -227,6 +249,8 @@ def user():
     session["prev_url"].append(("user", user_id))
     return render_template("user.html", userInfo=userInfo, userFiles=userFiles, comments = comments, subscribed=subscribed, subscribers=subscribers)
 
+
+
 @app.route('/subscribe')
 def subscribe():
     if 'username' in session:
@@ -240,6 +264,8 @@ def subscribe():
     else:
         return redirect('/login')
 
+
+
 @app.route('/subscribtions')
 def subscribtions():
     if 'username' in session:
@@ -249,6 +275,8 @@ def subscribtions():
         return render_template("Subscribtionpage.html", list_Subscribtion = list_Subscribtion, user_dict = user_info)
     else:
         return redirect('/login')
+
+
 
 @app.route('/editprofile', methods=["POST", "GET"])
 @app.route('/user/editprofile', methods=["POST", "GET"])
@@ -280,6 +308,8 @@ def editprofile():
     else:
         return redirect(url_for('login'))
 
+
+
 @app.route('/login', methods=["POST", "GET"])
 def login():
     '''
@@ -308,6 +338,9 @@ def login():
 
 
     return render_template("login.html")
+
+
+    
 @app.route('/signup', methods=["POST", "GET"])
 def signup():
     '''
@@ -331,6 +364,9 @@ def signup():
     else:
         session["prev_url"].append(("signup", ))
         return render_template("signup.html")
+
+
+
 @app.route('/logout')
 def logout():
     '''
@@ -339,6 +375,9 @@ def logout():
     session.pop('username', None) #supprime la session en cours
     session.pop('iduser', None)
     return redirect(url_for('login'))
+
+
+
 @app.route('/forgotpassword', methods=["POST", "GET"])
 def forgotpassword():
     if request.method == "POST":
@@ -354,6 +393,9 @@ def forgotpassword():
     else:
         session["prev_url"].append(("forgotpassword", ))
         return render_template("forgetpassword.html")
+
+
+
 @app.route('/resetforgottenpassword', methods=["POST", "GET"])
 def resetforgottenpassword():
     idreset = request.args.get('i')
@@ -366,6 +408,8 @@ def resetforgottenpassword():
     else:
         return redirect("/")
 
+
+
 @app.route('/delete', methods=["GET", "POST"])
 def deletebutton():
     if request.method == "POST":
@@ -376,5 +420,4 @@ def deletebutton():
 
 if __name__ ==  '__main__' :
     context = ('ssl/cert.pem', 'ssl/key.pem')
-    app.run( host='0.0.0.0', port=5005, ssl_context=context )
-    # app.run(debug=True) # connexion locale
+    app.run( host='127.0.0.1', port=5005, ssl_context=context, debug=True )

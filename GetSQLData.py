@@ -8,7 +8,7 @@ from unidecode import unidecode
 
 from miscellaneous import *
 
-connection = mc.connect(host = 'localhost', database = 'groupe5', user = user, password = password)
+connection = mc.connect(host = '127.0.0.1', database = 'YouFile', user = user, password = password)
 cursor = connection.cursor()
 
 

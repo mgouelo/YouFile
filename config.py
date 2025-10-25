@@ -1,2 +1,2 @@
-user = 'groupe5'
+user = 'admin'
 password = 'abcde12345'
