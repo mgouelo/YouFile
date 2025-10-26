@@ -31,7 +31,10 @@ CREATE TABLE IF NOT EXISTS files (
         FOREIGN KEY (user_id) REFERENCES users(id)
         ON UPDATE CASCADE ON DELETE CASCADE,
     
-    PRIMARY KEY(id)
+
+    PRIMARY KEY(id),
+
+    FULLTEXT KEY idx_files_fulltext (file_name, description)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 

@@ -11,109 +11,222 @@ from miscellaneous import *
 connection = mc.connect(host = '127.0.0.1', database = 'YouFile', user = user, password = password)
 cursor = connection.cursor()
 
+ALLOWED_TABLES = {"users", "files", "comments", "subscriptions", "ratings"}
 
-def keyisintable(table:str, keyv, key:str="id"):
+def valueIsInTable(table:str, value, key:str="id"):
     '''
-    Donne si la valeur keyv de la clé key est présente dans la table table
+    Precondition : receives a table, a key (id by default) and a value
+    Postcondition : returns True if the value of the key is present in the table, else False
     '''
-    return getTableInformation(table, keyv, key) is not None
+    return getTableInfo(table, value, key) is not None
 
-def getTableInformation(table, keyv, key:str="id"):
+
+def getTableInfo(table, value, key:str="id"):
     '''
-    Renvoie les éléments de la table table dont la clé key (par défaut "id") est égale à la valeur keyv
+    Precondition : receives a table, a key and a value to compare
+    Postcondition : returns the elements of the table whose key (default “id”) is equal to the value
     '''
-    if type(keyv) == str:
-        cursor.execute(f"SELECT * FROM {table} WHERE `{key}` = '{keyv}';")
-    else:
-        cursor.execute(f"SELECT * FROM {table} WHERE `{key}` = {keyv};")
+    if table not in ALLOWED_TABLES:
+        raise ValueError(f"Error getTableInfo() : the table '{table}' doesn't exists")
+
+    cursor.execute(f"SELECT * FROM `{table}` WHERE `{key}` = %s;", (value,))
     tablecontent = cursor.fetchall()
-    if len(tablecontent) > 0: return tablecontent
+    if len(tablecontent) > 0:
+        return tablecontent
     return None
 
 
-def getRoleInformation(id):
-    return getTableInformation('Roles', id)
-def getRoleInformationDict(id):
-    return(["id", "username", "email", "role", "creationdate", "profile age"], getRoleInformation(id)[0])
+def getUserInfo(user_id):
+    '''
+    Precondition : receives an user id
+    Postcondition : return user's details from the DB
+    '''
+    return getTableInfo('users', user_id)
 
 
-def getImageInformation(id):
-    return getTableInformation('Images', id)
-def getImageInformationDict(id):
-    return convertToDictionnary(["id", "filep"], getImageInformation(id)[0])
+def getUserInfoDict(user_id):
+    '''
+    Precondition : receives an user id
+    Postcondition : return a python dictionnary which contains user's details from the DB
+    '''
+    return convertToDictionnary(["id", "user_name", "email", "password_hash", "bio", "profile_pic", "creation_date", "last_update", "is_admin"], getUserInfo(user_id)[0])
 
-def getUserInformation(id):
-    return getTableInformation('Users', id)
-def getUserInformationDict(id):
-    return convertToDictionnary(["id", "username", "email", "role", "creationdate", "profileImage", "description", "password"], getUserInformation(id)[0])
-def shearchUserInformationEmail(email):
-    return getTableInformation('Users', email, key='email')
-def shearchUserInformationEmailDict(email):
+
+def searchUserByEmail(email):
+    '''
+    Precondition : receives an email
+    Postcondition : returns, if exists, the user associated with the provided email
+    '''
+    return getTableInfo('users', email, key='email')
+
+
+def searchUserByEmailDict(email):
+    '''
+    Precondition : receives an email
+    Postcondition : returns, if exists, a python dictionnary with the details about the user associated with the provided email
+    '''
     try:
-        return convertToDictionnary(["id", "username", "email", "role", "creationdate", "profileImage", "description", "password"], shearchUserInformationEmail(email)[0])
+        return convertToDictionnary(["id", "user_name", "email", "password_hash"], searchUserByEmail(email)[0])
     except:
         return None
-def getUserSubscribers(id):
-    return getTableInformation('Subscribtions', id, 'idsubscribed')
-def getUserSubscribersDict(id):
-    subscribersList = getUserSubscribers(id)
-    subscribersListDict = list()
-    if subscribersList is not None:
-        for subscriber in subscribersList:
-            subscribersListDict.append(convertToDictionnary(["id", "idsubscriber", "idsubscribed", "datesubscribtion"], subscriber))
-        return subscribersListDict
+
+# subscriber_id est l'id de la personne qui s'est abonnée à subscribed_id
+def getUserSubscribers(user_id):
+    '''
+    Precondition : reveives an user id
+    Postcondition : returns all user's subscribers
+    '''
+    return getTableInfo('subscriptions', user_id, 'subscribed_id')
+
+
+def getUserSubscribersDict(user_id):
+    '''
+    Precondition : reveives an user id
+    Postcondition : returns, if exists, a dict of user's subscribers
+    '''
+    subList = getUserSubscribers(user_id)
+    subDictofList = list()
+    if subList is not None:
+        for sub in subList:
+            subDictofList.append(convertToDictionnary(["id", "subscriber_id", "subscribed_id", "subscription_date"], sub))
+        return subDictofList
     else:
         return []
 
-def getSubscriptionInformation(id):
-    return getTableInformation('Subscribtions', id)
-def getSubscriptionInformationDict(id):
-    return convertToDictionnary(["id", "idsubscriber", "idsubscribed", "datesubscribtion"], getSubscriptionInformation(id)[0])
 
-def getFileShareInformation(id):
-    return getTableInformation('Files', id)
-def getFileShareInformationDict(id):
-    return convertToDictionnary(["id", "iduser", "name", "datepubli", "filep", "imagep", "description", "filetype", "fileextension", "size"], getFileShareInformation(id)[0])
+def getSubscriptionInfo(sub_id):
+    '''
+    Precondition : reveives an user id
+    Postcondition : returns all user's subscribers
+    '''
+    return getTableInfo('subscriptions', sub_id)
 
-def getRatingInformation(id):
-    return getTableInformation('Ratings', id)
-def getRatingInformationDict(id):
-    return convertToDictionnary(["id", "idfileshare", "iduser", "value"], getRatingInformation(id)[0])
-def getUserRating(iduser, idfileshare):
-    cmd = f"""
-    SELECT `id`, `value`
-    FROM `Ratings`
-    WHERE `idfileshare` = '{idfileshare}'
-    AND `iduser` = '{iduser}';
+
+def getSubscriptionInfoDict(sub_id):
+    '''
+    Precondition : reveives a subscription id
+    Postcondition : returns, if exists, a dict of subscription info
+    '''
+    return convertToDictionnary(["id", "subscriber_id", "subscribed_id", "subscription_date"], getSubscriptionInfo(sub_id)[0])
+
+
+def getFileInfo(file_id):
+    '''
+    Precondition : reveives a file id
+    Postcondition : returns, if exists, file's info
+    '''
+    return getTableInfo('files', file_id)
+
+
+def getFileInfoDict(file_id):
+    '''
+    Precondition : reveives a file id
+    Postcondition : returns, if exists, a dict with the file's info
+    '''
+    return convertToDictionnary(["id", "file_name", "description", "file_path", "file_type", "size_bytes", "thumbnail_path", "uploaded_at", "updated_at", "visibility", "user_id"], getFileInfo(file_id)[0])
+
+
+def getRatingInfo(rate_id):
+    '''
+    Precondition : reveives a rate id
+    Postcondition : returns, if exists, rate's info
+    '''
+    return getTableInfo('ratings', rate_id)
+
+
+def getRatingInfoDict(rate_id):
+    '''
+    Precondition : reveives a rate id
+    Postcondition : returns, if exists, a dict with the rate's info
+    '''
+    return convertToDictionnary(["id", "file_id", "user_id", "value"], getRatingInfo(rate_id)[0])
+
+
+def getUserRating(user_id, file_id):
     """
-    cursor.execute(cmd)
+    Precondition : receives an user id and a file id 
+    Postcondition : returns user's note for this file
+    """
+
+    cmd = """
+    SELECT id, value
+    FROM ratings
+    WHERE user_id = %s
+    AND file_id = %s;
+    
+    """
+    cursor.execute(cmd, (user_id, file_id,))
     rating = cursor.fetchall()
     if len(rating) == 0:
         return [(0, 0)]
-    print(rating)
     return rating
-def getUserRatingDict(iduser, idfileshare):
-    return convertToDictionnary(["id", "value"], getUserRating(iduser, idfileshare)[0])
-def hasUserRatedFileshare(iduser, idfileshare):
-    rating = getUserRating(iduser, idfileshare)
-    return rating != [(0, 0)]
 
-def getCommentInformation(id):
-    return getTableInformation('Comments', id)
-def getCommentInformationDict(id):
-    return convertToDictionnary(["id", "iduser", "idfileshare", "idcommentawnser", "content", "datepubl"], getCommentInformation(id)[0])
 
-def getPasswordResetingInformation(id):
-    return getTableInformation(' ForgottenPasswords', id)
-def getPasswordResetingInformationDict(id):
-    return convertToDictionnary(["id", "iduser", "limitdate", "used"], getPasswordResetingInformation(id)[0])
+def getUserRatingDict(user_id, file_id):
+    '''
+    Precondition : reveives an user id and a file id
+    Postcondition : returns, if exists, a dict with the rate's info
+    '''
+    return convertToDictionnary(["id", "value"], getUserRating(user_id, file_id)[0])
+
+
+def hasUserRatedFileshare(user_id, file_id):
+    '''
+    Precondition : reveives an user id and a file id
+    Postcondition : returns True if the user rated files, else False
+    '''
+    rate = getUserRating(user_id, file_id)
+    return rate != [(0, 0)]
+
+
+def getCommentInfo(comment_id):
+    """
+    Precondition : receives an comment id
+    Postcondition : returns comment's info
+    """
+    return getTableInfo('comments', comment_id)
+
+
+def getCommentInfoDict(comment_id):
+    """
+    Precondition : receives an comment id
+    Postcondition : returns a dict with comment's info
+    """
+    return convertToDictionnary(["id", "user_id", "file_id", "parent_id", "content", "publi_date"], getCommentInfo(comment_id)[0])
+
+
+def getPasswordResetInfo(resetPass_id):
+    """
+    Precondition : receives an password reset id
+    Postcondition : returns password reseting's info
+    """
+    return getTableInfo('password_resets', resetPass_id)
+
+
+def getPasswordResetInfoDict(resetPass_id):
+    """
+    Precondition : receives an password reset id
+    Postcondition : returns a dict with password reseting's info
+    """
+    return convertToDictionnary(["id", "user_id", "token", "expiration", "used", "creation"], getPasswordResetInfo(resetPass_id)[0])
+
 
 def closeDB():
+    """
+    Precondition : the DB should be open
+    Postcondition : close properly the DB
+    """
     cursor.close()
     connection.close()
 
-def getFileShareComments(id):
-    cmd = f"""
+
+def getFileShareComments(file_id):
+    '''
+    Precondition : receives the ID of a file
+    Postcondition : returns the user's comment under the specified file
+    '''
+
+    cmd = """
     SELECT
         F.id,
         C.iduser,
@@ -123,21 +236,23 @@ def getFileShareComments(id):
         C.datepubl,
         C.id
     FROM
-        Files AS F
+        files AS F
     JOIN
-        Comments AS C
+        comments AS C
         ON
-            C.idfileshare = F.id
+            C.file_id = F.id
     JOIN
-        Users AS U
+        users AS U
         ON
-            U.id = C.iduser
+            U.id = C.user_id
     WHERE
-        F.id = '{id}';
+        F.id = %s;
     """
-    cursor.execute(cmd)
+    cursor.execute(cmd, (file_id,))
     tablecontent = cursor.fetchall()
     return tablecontent
+
+
 def getFileShareCommentsDict(id):
     commentList = getFileShareComments(id)
     commentsListDict = list()
@@ -148,33 +263,42 @@ def getFileShareCommentsDict(id):
     else:
         return None
 
-def getUserComments(id):
-    cmd = f"""
+
+def getUserComments(user_id):
+    '''
+    Precondition : reveives an user id
+    Postcondition : returns user's comments
+    '''
+
+    cmd = """
     SELECT
         F.id,
+        F.file_name,
         U.id,
-        U.username,
-        U.imagep,
-        C.content,
-        C.datepubl,
+        U.user_name,
+        U.profile_pic,
         C.id,
-        F.name
+        C.content,
+        C.publi_date
+        
     FROM
-        Users AS U
+        users AS U
     JOIN
-        Comments AS C
+        comments AS C
         ON
-            C.iduser = U.id
+            U.id = C.user_id
     JOIN
-        Files AS F
+        files AS F
         ON
-            F.id = C.idfileshare
+            C.file_id = F.id
     WHERE
-        U.id = '{id}';
+        U.id = %s;
     """
-    cursor.execute(cmd)
-    tablecontent = cursor.fetchall()
-    return tablecontent
+    cursor.execute(cmd, (user_id,))
+    contentTable = cursor.fetchall()
+    return contentTable
+
+
 def getUserCommentsDict(id):
     commentList = getUserComments(id)
     commentsListDict = list()
@@ -185,8 +309,11 @@ def getUserCommentsDict(id):
     else:
         return None
 
+
 def getUserFileShares(iduser):
     return getTableInformation('Files', iduser, key='iduser')
+
+
 def getUserFileSharesDict(iduser):
     filesList = getUserFileShares(iduser)
     filesListDict = list()
@@ -197,25 +324,33 @@ def getUserFileSharesDict(iduser):
     except:
         return None
 
-def searchFile(search):
-    '''
-    Renvoie les fichiers comportant au moins un des mots de search. Ces fichiers sont triés du plus pertinent au moins pertinent. Le plus pertinent correspond à celui dont le titre resemble le plus à la recherche.
-    '''
-    listwords = unidecode(str(search)).lower().split(" ")
-    files = []
-    file_list = []
-    for word in listwords:
-        cmd =   """
-        SELECT *
-        FROM Files
-        WHERE name LIKE %s;
-        """
-        #SELECT * FROM blah WHERE email LIKE CONCAT('%', %s, '%') limit 10
-        cursor.execute(cmd, ("%" + word + "%",))
-        files = cursor.fetchall()
-        for elt in files:
-            file_list.append(elt)
-    return mostCommonElement(file_list)
+
+
+def searchFile(search: str, limit: int = 10, offset: int = 0):
+    """
+    Precondition : fulltext research on files(file_name, description), mode 'natural language'.
+    - search : user's research
+    - limit : max number of files returned
+    - offset : number of files to skip
+    Postcondition : from most relevant to least relevant
+    """
+    query = unidecode((search or "").strip())
+    if not query:
+        return []
+
+    sql = """
+        SELECT
+            f.id, f.file_name, f.file_path, f.description, f.publi_date, f.user_id,
+            MATCH(f.file_name, f.description) AGAINST (%s IN NATURAL LANGUAGE MODE) AS score
+        FROM files f
+        WHERE MATCH(f.file_name, f.description) AGAINST (%s IN NATURAL LANGUAGE MODE)
+        ORDER BY score DESC, f.publi_date DESC
+        LIMIT %s OFFSET %s
+    """
+    cursor.execute(sql, (query, query, limit, offset))
+    result = cursor.fetchall()
+    return result
+
     
 def searchFileDict(search):
     lst = list()
@@ -224,19 +359,23 @@ def searchFileDict(search):
         lst.append(convertToDictionnary(["id","iduser", "name", "datepubli", "filep", "imagep", "description", "filetype", "fileextension", "size"], file))
     return lst
 
+
 def getRecentfiles():
     '''
-    Renvoie les fichiers mis en ligne le plus récemment
+    Precondition : 
+    Postcondition : returns the most recently published files
     '''
-    cmd = f"""
+
+    cmd = """
     SELECT *
-    FROM Files
-    ORDER BY datepubli DESC
-    LIMIT 4;   
+    FROM files
+    ORDER BY updated_at DESC
+    LIMIT 4;
     """
     cursor.execute(cmd)
-    allfiles = cursor.fetchall()
-    return allfiles
+    recentFiles = cursor.fetchall()
+    return recentFiles
+
 
 def getRecentfilesDict():
     files = getRecentfiles()
@@ -245,19 +384,29 @@ def getRecentfilesDict():
         files_list_dict.append(convertToDictionnary(["id", "iduser", "name", "datepubli", "filep", "imagep", "description", "filetype", "fileextension", "size"], file))
     return files_list_dict
 
+
 def isSubscribed(id_subscriber, id_subscribed):
     '''
-    Renvoie True si l'utilisateur id_subsriber est abonné à id_subsribed, False sinon
+    Precondition : receives two users id
+    Postcondition : returns True if the first user is subscribed to the second one
     '''
-    cmd = f"""
-    SELECT *
-    FROM `Subscribtions`
-    WHERE `idsubscriber` = '{id_subscriber}'
-    AND `idsubscribed` = '{id_subscribed}';
+
+    if id_subscriber == id_subscribed:
+        return False
+
+    cmd = """
+    SELECT EXISTS(
+        SELECT 1
+        FROM subscriptions
+        WHERE subscriber_id = %s AND subscribed_id = %s
+    );
     """
-    cursor.execute(cmd)
-    result = cursor.fetchall()
-    return len(result) != 0
+    cursor.execute(cmd, (id_subscriber, id_subscribed,))
+    result = cursor.fetchone()
+    if not result: # si cursor.fetchone() renvoie None => erreur coté SQL
+        return False
+    return result[0] == 1
+
 
 def getAverageRatingFileShare(id):
     '''
@@ -271,6 +420,7 @@ def getAverageRatingFileShare(id):
         return somme / len(results)
     else:
         return 'No Ratings'
+
 
 def getUserSubscribtions(id):
     '''
@@ -286,6 +436,7 @@ def getUserSubscribtions(id):
     result = cursor.fetchall()
     return result
 
+
 def getUserSubscribtionsDict(id):
     list_keys = ['id', 'username', 'imagep', 'description']
     list_tuple = getUserSubscribtions(id)
@@ -293,6 +444,7 @@ def getUserSubscribtionsDict(id):
     for tup in list_tuple:
         list_dict.append(convertToDictionnary(list_keys, tup))
     return list_dict
+
 
 def isResetingPasswordStillPossible(id):
     '''

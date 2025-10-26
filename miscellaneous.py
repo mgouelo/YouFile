@@ -22,11 +22,13 @@ def randomID(lenght:int):
         lenght -= 1
     return id
 
+
 def mostCommonElement(lst:list):
     '''
     Classe les éléments d'une liste du plus commun au plus rare
     '''
     return sorted(set(lst), key=lst.count, reverse=True)
+
 
 def convertToAdequateFileSize(size:int):
     '''
@@ -34,10 +36,10 @@ def convertToAdequateFileSize(size:int):
     Une taille 1x10^9 B renverra 1 GB, Une taille de 1090 B renverra 1.1 KB 
     '''
     if size >= 1000000000:
-        return f"{round(size/1000000000, 1)} GB"
+        return f"{round(size/1000000000, 1)} Gb"
     elif size >= 1000000:
-        return f"{round(size/1000000, 1)} MB"
+        return f"{round(size/1000000, 1)} Mb"
     elif size >= 1000:
-        return f"{round(size/1000, 1)} KB"
+        return f"{round(size/1000, 1)} Kb"
     else:
         return f"{size}"
