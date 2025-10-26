@@ -19,7 +19,7 @@ CREATE TABLE IF NOT EXISTS files (
     file_name VARCHAR(255) NOT NULL,
     description TEXT,
     file_path VARCHAR(255) NOT NULL,
-    file_type VARCHAR(4),
+    file_type VARCHAR(50),
     size_bytes BIGINT,
     thumbnail_path VARCHAR(255),
     uploaded_at DATETIME DEFAULT CURRENT_TIMESTAMP,
